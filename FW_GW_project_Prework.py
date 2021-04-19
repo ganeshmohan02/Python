@@ -1,9 +1,9 @@
 def main():
     import getpass
     from FW_GW_project3 import Client
-    host = "172.19.254.4"
+    host = "172.19.####"
     usr="admin"
-    pwd = "!@#CiScO123"
+    pwd = "!@#######"
     #tn = input("Enter the Tenant Name:")
     tn = "HNSEC_FW_GW"
     vrf = input("Enter the VRF Name:")
