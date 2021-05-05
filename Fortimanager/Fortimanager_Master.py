@@ -174,7 +174,6 @@ class FortiManager:
                 {
                     "url": "/pm/config/device/"+ device_name +"/vdom/root/router/access-list",
                     "data": [{"rule":[{ "id":0,"prefix": advertise_subnet}],"name": access_list}],
-                     #"data": [{"rule":[{ "edit":0,"prefix": advertise_subnet}],"name": access_list}],
      
                 }
             ],
@@ -289,76 +288,3 @@ class FortiManager:
         res = res.json()
         print(json.dumps(res, indent=4))
         return res
-"""
-    def append_access_list(self, device_name, advertise_subnet, t7,access_list):
-        new_data = [{"rule":[{ "id":0,"prefix": advertise_subnet}],}],
-        print(new_data)
-        res = t7
-        curr_data = res["result"][0]["data"]
-        print(curr_data)
-        rules=curr_data[0]["rule"].append(new_data)
-        print(rules)
-        #print("Configure the FM to create the access_list and then add the prefixes"
-        params = {
-            "method": "set",
-            "params": [
-                {
-                    "url": "/pm/config/device/"+ device_name +"/vdom/root/router/access-list",
-                    "data": [{"rule":rules,"name": access_list}],
-
-     
-                }
-            ],
-            "id": 1,
-            "session": self.session,
-        }
-        res = requests.post(url=self.URL, headers=self.HEADERS, json=params, verify=False)
-        res = res.json()
-        #print(json.dumps(params, indent=4))
-        return res   
-
-   def append_access_list(self, device_name, advertise_subnet, access_list):
-        print("Configure the FM to create the access_list and then add the prefixes")
-        params = {
-            "method": "set",
-            "params": [
-                {
-                    "url": "/pm/config/device/"+ device_name +"/vdom/root/router/access-list",
-                    "data": [{"rule":[{ "id":0,"prefix": advertise_subnet}],"name": access_list}],
-                     #"data": [{"rule":[{ "edit":0,"prefix": advertise_subnet}],"name": access_list}],
-     
-                }
-            ],
-            "id": 1,
-            "session": self.session,
-        }
-        res = requests.post(url=self.URL, headers=self.HEADERS, json=params, verify=False)
-        res = res.json()
-        #print(json.dumps(params, indent=4))
-        return res 
-       
-    # Pull the configuration from the Fortimanager Database.
-    def get_config_block(self, device_name, scope, config_block):
-        print("\n Pulling current REST API configuration from the controller for :{}\n".format(config_block))
-        params = {
-            "method": "get",
-            "params": [{"url": "/pm/config/device/" + device_name + "/" + scope + "/" + config_block, }],
-            "id": 1,
-            "session": self.session,
-        }
-        res = requests.post(url=self.URL, headers=self.HEADERS, json=params, verify=False)
-        res = res.json()
-        #print(json.dumps(res, indent=4))
-        return res 
-    def update_access_list(device_name, list_name, data):
-       
-    fmg = FortiManager("fortiapi", "fortiapi", "https://172.19.255.53/jsonrpc")
-    fmg.login()
-    res = get_config_block(device_name, "vdom/root", "router/access-list" + list_name)
-    url = res["result"][0]["url"]
-    curr_data = res["result"][0]["data"]
-    curr_data[0]["rule"].append(data)
-   
-    res = fmg.add_config_block(curr_data, url)    
-
-    """
