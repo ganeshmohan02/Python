@@ -9,9 +9,9 @@ vlan_list =[{
     "l3out_ipadd": "172.16.1.2/30",
     "gw_subnet": "192.168.1.1/24",
     "l3out_phy_interface":"port3",
+    "l3out_rm_name":"DSS_RM_L3out",
     "current_phy_interface":"port2",
     "current_vlan_interface":"WEB",
-    "l3out_rm_name":"DSS_RM_L3out",
     },
     {
     "device_name": "FortiGate-VM01v",
@@ -25,4 +25,6 @@ vlan_list =[{
     "gw_subnet": "192.168.2.1/24",
     "l3out_phy_interface":"port3",
     "l3out_rm_name":"DSS_RM_L3out",
+    "current_phy_interface":"port2",
+    "current_vlan_interface":"APP",    
     }]
