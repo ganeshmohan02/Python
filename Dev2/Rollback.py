@@ -3,7 +3,7 @@ def main():
     import csv
     from FW_GW_project_Master import Client
     usr="admin"
-    pwd = "!@#CiScO123"
+    pwd = "!@#####"
     input_file = csv.DictReader(open("data.csv",encoding="utf-8-sig"))
     for data in input_file:
      host=(data["Fabric_Host_IP"])
