@@ -2,9 +2,9 @@ def main():
     import getpass
     import csv
     from FW_GW_project_Master import Client
-    host = "172.19.254.4"
+    host = "172.X.X.X"
     usr="admin"
-    pwd = "!@#CiScO123"
+    pwd = "!@####"
     input_file = csv.DictReader(open("data.csv",encoding="utf-8-sig"))
     for data in input_file:
      host=(data["Fabric_Host_IP"])
