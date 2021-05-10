@@ -1,8 +1,11 @@
-"Fortimanager_Master"-file for all the fortimanager class & functions RESTAPI call.
-"fwinput_cfg" -file for variables {WEB,APP}(Source of data).
-"FMPrework"-file for prework job.
-"Cutover"  -file for cutover job.
-"Rollback" -file for rollback job.
+###########FortiManager Automation project#########
+Details information for each files:
+************************************
+1. "Fortimanager_Master"-file contains all the fortimanager class & functions RESTAPI call.
+2. "fwinput_cfg" -file for variables {WEB,APP}(Source of data).
+3. "FMPrework"-file for prework job.
+4. "Cutover"  -file for cutover job.
+5. "Rollback" -file for rollback job.
 **********************************************
 
 Prework task list:
