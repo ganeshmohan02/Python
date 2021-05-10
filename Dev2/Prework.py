@@ -2,9 +2,9 @@ def main():
     import getpass
     import csv
     from FW_GW_project_Master import Client
-    #host = "172.19.254.4"
+    #host = "172.X.X.X"
     usr="admin"
-    pwd = "!@#CiScO123"
+    pwd = "!@#C####"
     #tn = "HNSEC_FW_GW"
     input_file = csv.DictReader(open("data.csv",encoding="utf-8-sig"))
     for data in input_file:
