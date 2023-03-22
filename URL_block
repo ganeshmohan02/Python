@@ -1,0 +1,78 @@
+#!/usr/local/bin/python3
+import requests
+import json
+import time
+import re
+requests.packages.urllib3.disable_warnings(requests.packages.urllib3.exceptions.InsecureRequestWarning)
+
+class FortiAPI:
+    def __init__(self, host, token, vdom):
+        self.host = host
+        self.token = token
+        self.vdom = vdom
+        #self.client = requests.Session()
+                             
+    def delete_Old_URLs(self):
+      url = https://{}/api/v2/cmdb/webfilter/urlfilter/1/entries?datasource=1&vdom={}.format(self.host,self.vdom)
+      headers = { 'Authorization': self.token,}
+      response = requests.request("DELETE", url, headers=headers, data={},verify=False)
+    
+   # To Block the all the customer provided urls.
+    def URL_Blocklist(self):
+      with open('URL_list_v3.json','r',encoding='utf-8-sig') as f:
+       URLS=f.read().splitlines()
+       URL_Block = list()
+      for URL_1 in URLS:
+        URL_1 = URL_1.rstrip()
+        if URL_1 != "":
+         URL_1 = re.sub(r'^(http://|https://)','',URL_1)   # remove http:// or https:// header\
+         URL_Block.append(URL_1)
+     
+      url_block_list = list() # To append the all customer provided URLS in dictionary format like [{URL1},{URL2}].
+      total = len(URL_Block)
+      for i in range (0,29191):  # total or no.of URLS in per payload ex:10000.
+        url_obj = dict()
+        url_obj['id'] =0
+        url_obj['url'] = URL_Block[i]
+        url_obj['type'] ="simple"
+        url_obj['action'] ="block"
+        url_obj['status'] ="enable"
+        url_block_list.append(url_obj)
+      block_payload =json.dumps(url_block_list)
+      url = https://{}/api/v2/cmdb/webfilter/urlfilter/1/entries?datasource=1&vdom={}.format(self.host,self.vdom)
+      headers = { 'Authorization': self.token,}
+      response = requests.request("POST", url, headers=headers, data=block_payload,verify=False)
+
+    # To allow the permit all REGEX in dictionary format.
+    def URL_Permit_All(self):
+      url_permit = dict()
+      url_permit['id'] =0
+      url_permit['url'] = "^.*$"
+      url_permit['type'] ="regex"
+      url_permit['action'] ="allow"
+      url_permit['status'] ="enable"
+      permit_payload =json.dumps(url_permit)
+      url = https://{}/api/v2/cmdb/webfilter/urlfilter/1/entries?datasource=1&vdom={}.format(self.host,self.vdom)
+      headers = { 'Authorization': self.token,}
+      response = requests.request("POST", url, headers=headers, data=permit_payload,verify=False)
+
+def main():
+device_info=[{"hostname":"J2STCicnat01","vdom":"HCO-NAT","token":"Bearer QzgHzzGzp6Nfb9fgzqfxwQQGd9mz9G"},]
+
+#J2DRA#172.29.104.238  Hhjm58gNnztkxgrzdpkHnGsrhwd8Q6
+total=len(device_info)
+for i in range (0,1):
+  start =time.perf_counter()
+  host = device_info[i]['hostname']
+  token= device_info[i]['token']
+  vdom = device_info[i]['vdom']
+  API=FortiAPI(host, token, vdom)
+  print("Calling the FortiAPI functions -> login into the Firewall")
+  API.delete_Old_URLs()
+  API.URL_Blocklist()
+  API.URL_Permit_All()
+  finish = time.perf_counter()
+  print(f' Finished {host}-{vdom} URL update in {round(finish-start, 2)} second(s)')
+
+if __name__ == '__main__':
+main()
