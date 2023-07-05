@@ -1,0 +1,130 @@
+[gmohan@vmwhnsoxs01 Brazil_63W_20W_URL]$ more joa_spo_riv_y3hor.py
+#!/usr/local/bin/python3
+import requests
+import json
+import time
+import re
+import os
+requests.packages.urllib3.disable_warnings(requests.packages.urllib3.exceptions.InsecureRequestWarning)
+
+class FortiAPI:
+    def __init__(self, host, token, vdom):
+        self.host = host
+        self.token = token
+        self.vdom = vdom
+        #self.client = requests.Session()
+
+    def delete_Old_URLs(self):
+      url = "https://{}/api/v2/cmdb/webfilter/urlfilter/1/entries?datasource=1&vdom={}".format(self.host,self.vdom)
+      headers = { 'Authorization': self.token,}
+      print("Delete all the URL entiries in the firewall")
+      response = requests.request("DELETE", url, headers=headers, data={},verify=False)
+      return
+  #To pull the existing URL list and pop the permit regex then delete all exiting URLS and finally push the existing URL without permit.
+    def pull_URLs(self):
+      url = "https://{}/api/v2/cmdb/webfilter/urlfilter/1?datasource=1&vdom={}".format(self.host,self.vdom)
+      headers = { 'Authorization': self.token,}
+      response = requests.request("GET", url, headers=headers, data={},verify=False)
+      res = response.json()
+      results = res["results"][0]["entries"]
+      print("Using GET method to pull no of URLs configured in the firewall:")
+      print(len(results))
+      for x in range(len(results)):
+        value =[]
+        for key,value in res["results"][0]["entries"][x].items():
+            if key in "url":
+               if "^.*$" in value:
+                    #rem_reg2 =res["results"][0]["entries"][x]
+                    #rem_reg =res["results"][0]["entries"][x]["id"]
+                    #rem_reg_1 = (rem_reg-1)
+                    #print(rem_reg2)
+                    #print(rem_reg_1)
+                    print("Using POP method remove the existing permit Regexp ^.*$ rule:")
+                    results1=results.pop()
+                    print(len(results))
+                    break
+      #print(results)
+      existing_payload =json.dumps(results)
+      self.delete_Old_URLs()
+      print("Push the existing no.of URL:{} back to the Firewall without permit Regexp rule:".format(len(results)))
+      url = "https://{}/api/v2/cmdb/webfilter/urlfilter/1/entries?datasource=1&vdom={}".format(self.host,self.vdom)
+      headers = { 'Authorization': self.token,}
+      response = requests.request("POST", url, headers=headers, data=existing_payload,verify=False)
+
+    # To append the newly provided urls list.
+    def URL_Blocklist(self):
+      with open('Brazil_url_block_list.json','r',encoding='utf-8-sig') as f:
+       URLS=f.read().splitlines()
+       URL_Block = list()
+      for URL_1 in URLS:
+        URL_1 = URL_1.rstrip()
+        if URL_1 != "":
+         URL_1 = re.sub(r'^(http://|https://)','',URL_1)   # remove http:// or https:// header\
+         URL_Block.append(URL_1)
+
+      url_block_list = list() # To append the all customer provided URLS in dictionary format like [{URL1},{URL2}].
+      total = len(URL_Block)
+      for i in range (0,total):  # total or no.of URLS in per payload ex:10000.
+        url_obj = dict()
+        url_obj['id'] =0
+        url_obj['url'] = URL_Block[i]
+        url_obj['type'] ="simple"
+        url_obj['action'] ="block"
+        url_obj['status'] ="enable"
+        url_block_list.append(url_obj)
+      #url_block_list.append(self.URL_existing)
+      block_payload =json.dumps(url_block_list)
+      url = "https://{}/api/v2/cmdb/webfilter/urlfilter/1/entries?datasource=1&vdom={}".format(self.host,self.vdom)
+      headers = { 'Authorization': self.token,}
+      print("Append the newly customer provided block list:{}".format(len(URL_Block)))
+      response = requests.request("POST", url, headers=headers, data=block_payload,verify=False)
+      print(response)
+
+    # To allow the permit all REGEX in dictionary format.
+    def URL_Permit_All(self):
+      url_permit = dict()
+      url_permit['id'] =0
+      url_permit['url'] = "^.*$"
+      url_permit['type'] ="regex"
+      url_permit['action'] ="allow"
+      url_permit['status'] ="enable"
+      permit_payload =json.dumps(url_permit)
+      url = "https://{}/api/v2/cmdb/webfilter/urlfilter/1/entries?datasource=1&vdom={}".format(self.host,self.vdom)
+      headers = { 'Authorization': self.token,}
+      print("Finally append the permit all RegEXP entires in the URL list")
+      response = requests.request("POST", url, headers=headers, data=permit_payload,verify=False)
+      print(f"{'#' *20} URL update completed for {self.host} {'#' *10}")
+    def ConfigBackup(self):
+      url = "https://{}/api/v2/monitor/system/config/backup?destination=file&scope=global".format(self.host)
+      headers = { 'Authorization': self.token,}
+      response = requests.request("GET", url, headers=headers, data={},verify=False)
+      print(self.host + ": Device Backup configuation successfully done locally!!!!!")
+      with open(self.host+".backup-config","wb") as f:
+          f.write(response.content)
+def main():
+ device_info=[
+             # {"hostname":"172.29.104.238","vdom":"HCO-NAT","token":"Bearer N1*********"},
+              {"hostname":"t19joaicnat01","vdom":"HDB_NAT","token":"Bearer mQ*************"},
+              {"hostname":"t19spoicnat01","vdom":"HDB_NAT","token":"Bearer hxd**********"},
+              {"hostname":"t19rivicnat01","vdom":"HDB_NAT","token":"Bearer py***********"},
+              {"hostname":"y3horicnat01","vdom":"HDB_NAT","token":"Bearer 11k***************"},
+              ]
+
+ total=len(device_info)
+ for i in range (0,4):
+  start =time.perf_counter()
+  host = device_info[i]['hostname']
+  token= device_info[i]['token']
+  vdom = device_info[i]['vdom']
+  API=FortiAPI(host, token, vdom)
+  print("Calling the FortiAPI functions -> login into the Firewall")
+  os.system("rm -rf *.backup-config")
+  API.ConfigBackup()
+  API.pull_URLs()
+  API.URL_Blocklist()
+  API.URL_Permit_All()
+  finish = time.perf_counter()
+  print(f' Finished {host} URL update in {round(finish-start, 2)} second(s)')
+
+if __name__ == '__main__':
+ main()
