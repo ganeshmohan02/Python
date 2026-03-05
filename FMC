@@ -1,0 +1,204 @@
+Config Sub interface 
+********************
+import requests
+import urllib3
+from requests.auth import HTTPBasicAuth
+import json
+# Silence the SSL warnings
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+FMC_HOST = "192.168.19.10"
+USERNAME = 'apiadmin'
+PASSWORD = "C!sco123!"
+basic = HTTPBasicAuth(USERNAME, PASSWORD)
+payload={}
+headers = {
+'Content-Type': 'application/json'
+}
+url = f"https://{FMC_HOST}/api/fmc_platform/v1/auth/generatetoken"
+response = requests.request("POST", url, headers=headers, data=payload, auth=basic, verify=False)
+if response.status_code == 204:
+ Token=response.headers["X-auth-access-token"]
+ Refresh_token=response.headers["X-auth-refresh-token"]
+ DOMAIN_UUID=response.headers["DOMAIN_UUID"]
+ payload={ }
+ headers = {
+ 'Content-Type': 'application/json',
+ 'X-auth-access-token': f'{Token}',
+ 'X-auth-refresh-token': f'{Refresh_token}'
+  }
+
+ url = f"https://{FMC_HOST}/api/fmc_config/v1/domain/{DOMAIN_UUID}/devices/devicerecords"
+ response = requests.request("GET", url, headers=headers, json=payload, verify=False)
+ DEVICE_UUID = response.json()['items'][0]['id']
+ device_name = response.json()['items'][0]['name']
+ #print(device_name)
+ #print(DEVICE_UUID)
+ #print()
+ url1 = f"https://{FMC_HOST}/api/fmc_config/v1/domain/{DOMAIN_UUID}/devices/devicerecords/{DEVICE_UUID}/physicalinterfaces"
+ response1 = requests.request("GET", url1, headers=headers, json=payload, verify=False)
+ #Parent_Inside_Name = response1.json()['items'][2]['name']
+ PARENT_INSIDE_UUID = response1.json()['items'][2]['id']
+ #Parent_Outside_Name = response1.json()['items'][3]['name']
+ Parent_Outside_ID = response1.json()['items'][3]['id']
+ #json_output = json.dumps(response1.json(), indent=4)
+ 
+ url_security_zone = f"https://{FMC_HOST}/api/fmc_config/v1/domain/{DOMAIN_UUID}/object/securityzones"
+ response2 = requests.get(url_security_zone, headers=headers, verify=False).json()
+ #print(response2)
+ #Inside_Zone_UUID = response2.json()['items'][0]['id']
+ #Outside_Zone_UUID = response2.json()['items'][1]['id']
+ print(response2)
+ sub_url = f"https://{FMC_HOST}/api/fmc_config/v1/domain/{DOMAIN_UUID}/devices/devicerecords/{DEVICE_UUID}/subinterfaces"
+ payload = {
+    "type": "SubInterface",
+    "vlanId": 103,
+    "subIntfId": 103,
+    "MTU": 9000,
+    "priority": 10,  
+    "enabled": True,
+    "name": "GigabitEthernet0/2",
+    "ifname": "VLAN103_Inside",
+    "ipv4": {
+        "static": {
+            "address": "192.168.103.1", 
+            "netmask": "255.255.255.0"
+                  }
+           },
+    "securityZone": {
+        "id": "21f9a034-1675-11f1-9f9a-96cc0f70466a",
+       "type": "SecurityZone"
+                }
+   }   
+ response = requests.post(sub_url, headers=headers, json=payload, verify=False)
+ print(f"Status Code: {response.status_code}")
+ print(response.json())
+
+
+*************************************************
+
+Network objects
+**************
+
+import requests
+import json
+FMC_HOST = '192.168.19.10'
+token = "05f46924-e5cf-47b4-83d0-0e556e4a383a"
+refresh_token = "5a7b5e76-5952-4464-af56-72900a1480e7"
+domain_UUID = 'e276abec-e0f2-11e3-8169-6d9ed49b625f'
+payload={
+'name': 'Data_Center_Network_4',
+'value': '192.168.70.0/24',
+'description': '192.168.70.0/24 Data Center Network'
+}
+headers = {
+'Content-Type': 'application/json',
+'X-auth-access-token': f'{token}',
+'X-auth-refresh-token': f'{refresh_token}'
+}
+url = f"https://{FMC_HOST}/api/fmc_config/v1/domain/{domain_UUID}/object/networks"
+response = requests.request("POST", url, headers=headers, json=payload, verify=False)
+json_output = json.dumps(response.json(), indent=4)
+print(json_output)
+!
+*****************
+Get the network objects
+***********************
+import requests
+import json
+FMC_HOST = '192.168.19.10'
+token = "af9bdbd7-c2c0-46cd-851e-9dc15d40c418"
+refresh_token = "af9bdbd7-c2c0-46cd-851e-9dc15d40c418"
+domain_UUID = 'e276abec-e0f2-11e3-8169-6d9ed49b625f'
+payload={}
+headers = {
+'Content-Type': 'application/json',
+'X-auth-access-token': f'{token}',
+'X-auth-refresh-token': f'{refresh_token}'
+}
+url = f"https://{FMC_HOST}/api/fmc_config/v1/domain/{domain_UUID}/object/networks"
+response = requests.request("GET", url, headers=headers, data=payload, verify=False)
+json_output = json.dumps(response.json(), indent=4)
+print(json_output)
+
+*********************************************
+Get the Token
+*************
+import requests
+from requests.auth import HTTPBasicAuth
+FMC_HOST = "192.168.19.10"
+USERNAME = 'apiadmin'
+PASSWORD = "*****!"
+basic = HTTPBasicAuth(USERNAME, PASSWORD)
+payload={}
+headers = {
+'Content-Type': 'application/json'
+}
+url = f"https://{FMC_HOST}/api/fmc_platform/v1/auth/generatetoken"
+response = requests.request("POST", url, headers=headers, data=payload, auth=basic, verify=False)
+if response.status_code == 204:
+ print()
+ print("Token")
+ print(response.headers["X-auth-access-token"])
+ print()
+ print("Refresh Token")
+ print(response.headers["X-auth-refresh-token"])
+ print()
+ print("Domain UUID")
+ print(response.headers["DOMAIN_UUID"])
+ print()
+else:
+ print(response.status_code)
+
+
+***************
+Interface 
+*************
+import requests
+import urllib3
+from requests.auth import HTTPBasicAuth
+import json
+# Silence the SSL warnings
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+FMC_HOST = "192.168.19.10"
+USERNAME = 'apiadmin'
+PASSWORD = "C!sco123!"
+basic = HTTPBasicAuth(USERNAME, PASSWORD)
+payload={}
+headers = {
+'Content-Type': 'application/json'
+}
+url = f"https://{FMC_HOST}/api/fmc_platform/v1/auth/generatetoken"
+response = requests.request("POST", url, headers=headers, data=payload, auth=basic, verify=False)
+if response.status_code == 204:
+ token=response.headers["X-auth-access-token"]
+ refresh_token=response.headers["X-auth-refresh-token"]
+ Domain_UUID=response.headers["DOMAIN_UUID"]
+ payload={ }
+ headers = {
+ 'Content-Type': 'application/json',
+ 'X-auth-access-token': f'{token}',
+ 'X-auth-refresh-token': f'{refresh_token}'
+  }
+
+ url = f"https://{FMC_HOST}/api/fmc_config/v1/domain/{Domain_UUID}/devices/devicerecords"
+ response = requests.request("GET", url, headers=headers, json=payload, verify=False)
+ device_UUID = response.json()['items'][0]['id']
+ device_name = response.json()['items'][0]['name']
+ print(device_name)
+ print(device_UUID)
+ print()
+ url1 = f"https://{FMC_HOST}/api/fmc_config/v1/domain/{Domain_UUID}/devices/devicerecords/{device_UUID}/physicalinterfaces"
+ response1 = requests.request("GET", url1, headers=headers, json=payload, verify=False)
+ Interface1_Name = response1.json()['items'][2]['name']
+ Interface1_UUID = response1.json()['items'][2]['id']
+ Interface2_Name = response1.json()['items'][3]['name']
+ Interface2_UUID = response1.json()['items'][3]['id']
+ json_output = json.dumps(response1.json(), indent=4)
+ #device_name = response.json()['items'][0]['name']
+ #print(json_output)
+ print(Interface1_Name)
+ print(Interface1_UUID)
+ print(Interface2_Name)
+ print(Interface2_UUID)
+
+
