@@ -8,7 +8,7 @@ import json
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 FMC_HOST = "192.168.19.10"
 USERNAME = 'apiadmin'
-PASSWORD = "C!sco123!"
+PASSWORD = "C!*****!"
 basic = HTTPBasicAuth(USERNAME, PASSWORD)
 payload={}
 headers = {
