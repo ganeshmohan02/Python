@@ -74,6 +74,14 @@ if response.status_code == 204:
  print(response.json())
 
 
+ """
+ check_url = f"https://{FMC_HOST}/api/fmc_config/v1/domain/{DOMAIN_UUID}/devices/devicerecords/{DEVICE_UUID}/subinterfaces"
+ check_Security_zone = f"https://{FMC_HOST}/api/fmc_config/v1/domain/{DOMAIN_UUID}/object/securityzones"
+ response = requests.get(check_Security_zone, headers=headers, verify=False).json()
+ Inside_Zone_ID = response1.json()['items'][0]['id']
+ Outside_Zone_ID = response1.json()['items'][1]['id']
+ print(Inside_Zone_ID)
+ """
 *************************************************
 
 Network objects
